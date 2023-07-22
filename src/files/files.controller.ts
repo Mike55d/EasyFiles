@@ -16,13 +16,20 @@ import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { CreateFileDto } from './dto/create-file.dto';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Files')
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'List of cats',
+    type: CreateFileDto,
+  })
   async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() createFile: CreateFileDto,
@@ -40,8 +47,12 @@ export class FilesController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const file = await this.filesService.getFile(id, res);
-    return new StreamableFile(file);
+    try {
+      const file = await this.filesService.getFile(id, res);
+      return new StreamableFile(file);
+    } catch (error) {
+      return 'file not found';
+    }
   }
 
   @Patch(':id')
