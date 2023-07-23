@@ -10,15 +10,19 @@ import {
   UploadedFile,
   StreamableFile,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { CreateFileDto } from './dto/create-file.dto';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Files')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}

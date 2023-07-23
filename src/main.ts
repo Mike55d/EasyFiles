@@ -10,6 +10,7 @@ async function bootstrap() {
     .setTitle('Easy files')
     .setDescription('app for store images and files')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
