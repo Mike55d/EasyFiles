@@ -21,19 +21,13 @@ import { CreateFileDto } from './dto/create-file.dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { SearchDto } from './dto/search.dto';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
-
+import { UploadImageDto } from './dto/upload-image.dto';
 @ApiTags('Files')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('files')
 export class FilesController {
-  constructor(
-    private readonly filesService: FilesService,
-    private readonly httpService: HttpService,
-  ) {}
+  constructor(private readonly filesService: FilesService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
@@ -79,22 +73,11 @@ export class FilesController {
 
   @Get('searchImages/search')
   async search(@Query() q: SearchDto) {
-    const apiUrl = 'https://api.unsplash.com/search/photos';
-    const { data } = await firstValueFrom(
-      this.httpService
-        .get(apiUrl, {
-          headers: {
-            Authorization:
-              'Client-ID Q1CN8auOdwNVxUhOtlo66VHp4ymHndHjq3wSz4DT_1g',
-          },
-          params: q,
-        })
-        .pipe(
-          catchError((error: AxiosError) => {
-            throw error;
-          }),
-        ),
-    );
-    return data;
+    return await this.filesService.search(q);
+  }
+
+  @Post('UploadImage/upload')
+  async uploadImage(@Body() uploadImageDto: UploadImageDto) {
+    return this.filesService.uploadImage(uploadImageDto);
   }
 }
